@@ -1,5 +1,8 @@
 
 import { create } from 'zustand';
+import img1 from '@/assets/cybercat.png';
+import img2 from '@/assets/cyberdog.png';
+import img3 from '@/assets/stonks.png';
 
 export type Meme = {
   id: string;
@@ -44,7 +47,7 @@ const generatePlaceholderMemes = (): Meme[] => {
     {
       id: '1',
       title: 'Cyber Doge',
-      imageUrl: 'https://source.unsplash.com/random/600x400/?cyberpunk,dog',
+      imageUrl: img1,
       tags: ['doge', 'cyberpunk', 'neon'],
       upvotes: 69,
       downvotes: 4,
@@ -58,7 +61,7 @@ const generatePlaceholderMemes = (): Meme[] => {
     {
       id: '2',
       title: 'Stonks Guy in 2077',
-      imageUrl: 'https://source.unsplash.com/random/600x400/?stock,neon',
+      imageUrl: img2,
       tags: ['stonks', 'crypto', 'money'],
       upvotes: 42,
       downvotes: 7,
@@ -72,7 +75,7 @@ const generatePlaceholderMemes = (): Meme[] => {
     {
       id: '3',
       title: 'Matrix Cat',
-      imageUrl: 'https://source.unsplash.com/random/600x400/?matrix,cat',
+      imageUrl: img3,
       tags: ['cat', 'matrix', 'glitch'],
       upvotes: 128,
       downvotes: 2,

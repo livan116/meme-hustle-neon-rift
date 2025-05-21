@@ -3,6 +3,10 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '@/lib/supabase';
 
+import img1 from '@/assets/cybercat.png';
+import img2 from '@/assets/cyberdog.png';
+import img3 from '@/assets/stonks.png';
+
 type User = {
   id: string;
   name: string;
@@ -26,7 +30,7 @@ const mockUsers = [
     id: 'user1',
     name: 'CyberNinja',
     credits: 1000,
-    avatar: 'https://source.unsplash.com/random/100x100/?cyberpunk,avatar',
+    avatar: img1,
     joinedDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30),
     ownedMemes: [],
   },
@@ -34,7 +38,7 @@ const mockUsers = [
     id: 'user2',
     name: 'NeonHacker',
     credits: 2500,
-    avatar: 'https://source.unsplash.com/random/100x100/?hacker,neon',
+    avatar: img2,
     joinedDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 15),
     ownedMemes: [],
   },
@@ -42,7 +46,7 @@ const mockUsers = [
     id: 'user3',
     name: 'GlitchQueen',
     credits: 1750,
-    avatar: 'https://source.unsplash.com/random/100x100/?cyberpunk,woman',
+    avatar: img3,
     joinedDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
     ownedMemes: [],
   }
@@ -55,6 +59,9 @@ export const useUserStore = create<UserStore>()(
       login: async (name) => {
         try {
           // First, check if we're in Supabase development mode
+          // Define supabaseUrl and supabaseAnonKey from environment variables or your supabase config
+          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+          const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
           if (supabaseUrl && supabaseAnonKey) {
             // In a real implementation, we would authenticate with Supabase here
             // For now, we'll simulate by checking if the user exists in Supabase users table
