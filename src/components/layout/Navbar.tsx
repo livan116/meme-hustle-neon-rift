@@ -18,7 +18,8 @@ const Navbar = () => {
         variant: "destructive"
       });
     } else {
-      login({ id: 'user-' + Math.floor(Math.random() * 1000), name: 'CyberHacker_' + Math.floor(Math.random() * 100), credits: 1000 });
+      // Fixed: Pass only the name string instead of an object
+      login('CyberHacker_' + Math.floor(Math.random() * 100));
       toast({
         title: "ACCESS GRANTED",
         description: "Terminal connection established",

@@ -1,6 +1,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { supabase } from '@/lib/supabase';
 
 type User = {
   id: string;
@@ -51,23 +52,68 @@ export const useUserStore = create<UserStore>()(
   persist(
     (set) => ({
       user: null,
-      login: (name) => {
-        // Find user from mock data or create new
-        const existingUser = mockUsers.find(u => u.name.toLowerCase() === name.toLowerCase());
-        
-        if (existingUser) {
-          set({ user: existingUser });
-        } else {
-          // Create new user if not found
-          const newUser = {
-            id: `user-${Date.now()}`,
-            name,
-            credits: 1000, // Starting credits
-            joinedDate: new Date(),
-            ownedMemes: [],
-          };
+      login: async (name) => {
+        try {
+          // First, check if we're in Supabase development mode
+          if (supabaseUrl && supabaseAnonKey) {
+            // In a real implementation, we would authenticate with Supabase here
+            // For now, we'll simulate by checking if the user exists in Supabase users table
+            // and create it if not
+            
+            // For now, using mock data
+            const existingUser = mockUsers.find(u => u.name.toLowerCase() === name.toLowerCase());
+            
+            if (existingUser) {
+              set({ user: existingUser });
+            } else {
+              // Create new user if not found
+              const newUser = {
+                id: `user-${Date.now()}`,
+                name,
+                credits: 1000, // Starting credits
+                joinedDate: new Date(),
+                ownedMemes: [],
+              };
+              
+              set({ user: newUser });
+            }
+          } else {
+            // Fallback to mock data when Supabase is not configured
+            const existingUser = mockUsers.find(u => u.name.toLowerCase() === name.toLowerCase());
+            
+            if (existingUser) {
+              set({ user: existingUser });
+            } else {
+              // Create new user if not found
+              const newUser = {
+                id: `user-${Date.now()}`,
+                name,
+                credits: 1000, // Starting credits
+                joinedDate: new Date(),
+                ownedMemes: [],
+              };
+              
+              set({ user: newUser });
+            }
+          }
+        } catch (error) {
+          console.error('Error logging in:', error);
+          // Fall back to mock data on error
+          const existingUser = mockUsers.find(u => u.name.toLowerCase() === name.toLowerCase());
           
-          set({ user: newUser });
+          if (existingUser) {
+            set({ user: existingUser });
+          } else {
+            const newUser = {
+              id: `user-${Date.now()}`,
+              name,
+              credits: 1000,
+              joinedDate: new Date(),
+              ownedMemes: [],
+            };
+            
+            set({ user: newUser });
+          }
         }
       },
       logout: () => set({ user: null }),
