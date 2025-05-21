@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import MemesGrid from '@/components/memes/MemesGrid';
+import MemeDuel from '@/components/memes/MemeDuel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
@@ -60,6 +61,11 @@ const MarketplacePage = () => {
               </Button>
             ))}
           </div>
+        </div>
+        
+        {/* Meme Duel Section */}
+        <div className="mb-8">
+          <MemeDuel />
         </div>
         
         {/* Memes grid */}

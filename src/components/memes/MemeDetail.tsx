@@ -16,6 +16,7 @@ const MemeDetail: React.FC = () => {
   const { toast } = useToast();
   const [bidAmount, setBidAmount] = useState('');
   const [isSubmitting, setBidSubmitting] = useState(false);
+  const [isGlitching, setIsGlitching] = useState(false);
   
   const meme = getMemeById(id || '');
   const bids = id ? getTopBids(id) : [];
@@ -41,6 +42,8 @@ const MemeDetail: React.FC = () => {
     }
     
     upvoteMeme(meme.id);
+    setIsGlitching(true);
+    setTimeout(() => setIsGlitching(false), 500);
     
     toast({
       title: "UPVOTED",
@@ -129,6 +132,7 @@ const MemeDetail: React.FC = () => {
         toast({
           title: "OWNERSHIP TRANSFERRED",
           description: `You now own "${meme.title}" for ${amount} credits!`,
+          className: "bg-neon-green/20 border-neon-green",
         });
       } else {
         toast({
@@ -161,7 +165,7 @@ const MemeDetail: React.FC = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
       {/* Left column - Meme Image */}
-      <div className="md:col-span-3">
+      <div className={`md:col-span-3 ${isGlitching ? 'animate-glitch' : ''}`}>
         <div className="cyber-card overflow-hidden">
           <div className="relative group">
             <img 

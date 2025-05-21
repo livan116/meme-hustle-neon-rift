@@ -34,6 +34,15 @@
     --ring: 300 69% 70%;
 
     --radius: 0.5rem;
+    
+    /* Cyberpunk neon colors */
+    --neon-pink: #ff00ff;
+    --neon-blue: #00ffff;
+    --neon-green: #00ff00;
+    --neon-purple: #bb00ff;
+    --cyber-dark: #0f0f19;
+    --cyber-darker: #070711;
+    --cyber-primary: #9b87f5;
   }
 }
 
@@ -137,6 +146,46 @@
     }
   }
 
+  /* New glitch animation for images */
+  @keyframes glitch-image {
+    0% {
+      transform: translate(0);
+      filter: hue-rotate(0deg);
+    }
+    10% {
+      transform: translate(-2px, 2px);
+      filter: hue-rotate(45deg);
+    }
+    20% {
+      transform: translate(2px, -2px);
+      filter: hue-rotate(90deg);
+    }
+    30% {
+      transform: translate(0);
+      filter: hue-rotate(0deg);
+    }
+    40% {
+      transform: translate(1px, -1px);
+      filter: hue-rotate(-45deg);
+    }
+    50% {
+      transform: translate(-1px, 2px);
+      filter: hue-rotate(45deg);
+    }
+    60% {
+      transform: translate(0);
+      filter: hue-rotate(0deg);
+    }
+    100% {
+      transform: translate(0);
+      filter: hue-rotate(0deg);
+    }
+  }
+
+  .animate-glitch > div img {
+    animation: glitch-image 0.5s linear;
+  }
+
   .cyber-button {
     position: relative;
     @apply bg-transparent border-2 border-neon-purple overflow-hidden 
@@ -216,10 +265,47 @@
     0%, 100% { border-color: transparent; }
     50% { border-color: #00ff00; }
   }
+
+  /* New terminal typing animation */
+  @keyframes terminal-typing {
+    from { width: 0 }
+    to { width: 100% }
+  }
+
+  .animate-terminal-typing {
+    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+    animation: 
+      terminal-typing 3s steps(40, end),
+      cursor-blink 0.75s step-end infinite;
+  }
+
+  /* Text flicker animation */
+  @keyframes text-flicker {
+    0%, 100% { opacity: 1; }
+    41.99% { opacity: 1; }
+    42% { opacity: 0.8; }
+    43% { opacity: 1; }
+    45% { opacity: 0.3; }
+    46% { opacity: 1; }
+  }
+
+  .animate-text-flicker {
+    animation: text-flicker 3s linear infinite;
+  }
 }
 
 :root {
   --cyber-grid: radial-gradient(circle, rgba(15, 15, 25, 0) 0%, rgba(15, 15, 25, 0.9) 100%), 
                  linear-gradient(rgba(15, 15, 25, 0.9) 2px, transparent 2px), 
                  linear-gradient(90deg, rgba(15, 15, 25, 0.9) 2px, transparent 2px);
+}
+
+/* Background grid pattern for cyberpunk feel */
+.bg-glitch-pattern {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.1) 1px, transparent 1px, transparent 2px),
+    repeating-linear-gradient(90deg, rgba(255, 0, 255, 0.1), rgba(255, 0, 255, 0.1) 1px, transparent 1px, transparent 2px);
+  background-size: 8px 8px;
 }

@@ -10,6 +10,7 @@ import CreateMemePage from "./pages/CreateMemePage";
 import MemeDetailPage from "./pages/MemeDetailPage";
 import MarketplacePage from "./pages/MarketplacePage";
 import LeaderboardPage from "./pages/LeaderboardPage";
+import ProfilePage from "./pages/ProfilePage";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/meme/:id" element={<MemeDetailPage />} />
           <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
