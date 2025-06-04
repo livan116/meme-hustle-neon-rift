@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -12,9 +11,8 @@ const MemeForm: React.FC = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [tags, setTags] = useState('');
   const [price, setPrice] = useState('100');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGeneratingCaption, setIsGeneratingCaption] = useState(false);
-  const { addMeme } = useMemeStore();
+  const { addMeme, isLoading, error } = useMemeStore();
   const { user } = useUserStore();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -22,7 +20,7 @@ const MemeForm: React.FC = () => {
   // Placeholder function for AI caption generation
   const generateAICaption = (memeTags: string[]): Promise<{ caption: string; vibe: string }> => {
     setIsGeneratingCaption(true);
-    
+
     // Simulating API call delay
     return new Promise(resolve => {
       setTimeout(() => {
@@ -37,7 +35,7 @@ const MemeForm: React.FC = () => {
           'neon': 'Glowing in the digital wasteland',
           'cyberpunk': 'Living on the edge of the net, one pixel at a time',
         };
-        
+
         const vibes: Record<string, string> = {
           'doge': 'Ironic Nostalgia',
           'cat': 'Digital Feline Chaos',
@@ -48,15 +46,15 @@ const MemeForm: React.FC = () => {
           'neon': 'Electric Dreams',
           'cyberpunk': 'Night City Rebel',
         };
-        
+
         // Find matching tags
         const matchingTag = memeTags.find(tag => captions[tag]) || memeTags[0] || 'meme';
-        
+
         const result = {
           caption: captions[matchingTag] || 'When you exist in cyberspace but nobody upvotes',
           vibe: vibes[matchingTag] || 'Digital Void Energy'
         };
-        
+
         setIsGeneratingCaption(false);
         resolve(result);
       }, 1500);
@@ -65,7 +63,7 @@ const MemeForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
       toast({
         title: "ACCESS DENIED",
@@ -74,7 +72,7 @@ const MemeForm: React.FC = () => {
       });
       return;
     }
-    
+
     if (!title || !imageUrl) {
       toast({
         title: "DATA ERROR",
@@ -83,18 +81,21 @@ const MemeForm: React.FC = () => {
       });
       return;
     }
-    
-    setIsSubmitting(true);
-    
+
     try {
+      console.log('Starting meme upload process...');
+
       // Process tags
       const tagsList = tags.split(',').map(tag => tag.trim().toLowerCase()).filter(Boolean);
-      
+      console.log('Processed tags:', tagsList);
+
       // Generate AI caption
+      console.log('Generating AI caption...');
       const { caption, vibe } = await generateAICaption(tagsList);
-      
-      // Add meme to store
-      addMeme({
+      console.log('Generated caption:', { caption, vibe });
+
+      // Prepare meme data
+      const memeData = {
         title,
         imageUrl,
         tags: tagsList,
@@ -105,23 +106,30 @@ const MemeForm: React.FC = () => {
         vibeAnalysis: vibe,
         upvotes: 0,
         downvotes: 0,
-      });
-      
+      };
+      console.log('Prepared meme data:', memeData);
+
+      // Add meme to store
+      console.log('Attempting to add meme to Supabase...');
+      await addMeme(memeData);
+      console.log('Meme successfully added to Supabase');
+
       toast({
         title: "MEME UPLOADED",
         description: "Your digital asset has been deployed to the network",
       });
-      
+
       // Navigate to homepage or meme details
       navigate('/');
     } catch (error) {
+      console.error('Error in handleSubmit:', error);
       toast({
         title: "UPLOAD FAILED",
-        description: "Connection error with the mainframe",
+        description: error instanceof Error
+          ? `Error: ${error.message}`
+          : "Connection error with the mainframe",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -139,10 +147,10 @@ const MemeForm: React.FC = () => {
               onChange={(e) => setTitle(e.target.value)}
               className="terminal-input"
               placeholder="Enter meme designation..."
-              disabled={isSubmitting}
+              disabled={isLoading || isGeneratingCaption}
             />
           </div>
-          
+
           <div>
             <label htmlFor="imageUrl" className="block text-neon-green mb-1 text-sm">
               IMAGE URL
@@ -153,13 +161,13 @@ const MemeForm: React.FC = () => {
               onChange={(e) => setImageUrl(e.target.value)}
               className="terminal-input"
               placeholder="Enter image source location..."
-              disabled={isSubmitting}
+              disabled={isLoading || isGeneratingCaption}
             />
             <p className="text-xs text-foreground/50 mt-1">
               Use any image URL or try Unsplash (e.g., https://source.unsplash.com/random/600x400/?cyberpunk)
             </p>
           </div>
-          
+
           <div>
             <label htmlFor="tags" className="block text-neon-pink mb-1 text-sm">
               TAGS
@@ -170,13 +178,13 @@ const MemeForm: React.FC = () => {
               onChange={(e) => setTags(e.target.value)}
               className="terminal-input"
               placeholder="doge, cyberpunk, neon..."
-              disabled={isSubmitting}
+              disabled={isLoading || isGeneratingCaption}
             />
             <p className="text-xs text-foreground/50 mt-1">
               Comma-separated tags (influences AI captions)
             </p>
           </div>
-          
+
           <div>
             <label htmlFor="price" className="block text-neon-purple mb-1 text-sm">
               INITIAL PRICE
@@ -189,20 +197,26 @@ const MemeForm: React.FC = () => {
               onChange={(e) => setPrice(e.target.value)}
               className="terminal-input"
               placeholder="100"
-              disabled={isSubmitting}
+              disabled={isLoading || isGeneratingCaption}
             />
             <p className="text-xs text-foreground/50 mt-1">
               Credits (currency of the cyberspace)
             </p>
           </div>
-          
+
+          {error && (
+            <div className="text-red-500 text-sm">
+              {error}
+            </div>
+          )}
+
           <div className="pt-2">
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="cyber-button w-full"
-              disabled={isSubmitting || isGeneratingCaption}
+              disabled={isLoading || isGeneratingCaption}
             >
-              {isSubmitting || isGeneratingCaption ? (
+              {isLoading || isGeneratingCaption ? (
                 <>
                   <span className="animate-pulse">PROCESSING</span>
                   <span className="ml-2 animate-text-flicker">...</span>

@@ -1,11 +1,18 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import MemesGrid from '@/components/memes/MemesGrid';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { useMemeStore } from '@/stores/memeStore';
 
 const Index = () => {
+  const { fetchMemes, isLoading, error } = useMemeStore();
+
+  useEffect(() => {
+    console.log('Fetching memes...');
+    fetchMemes().catch(console.error);
+  }, [fetchMemes]);
+
   return (
     <Layout>
       <section className="mb-16">
@@ -22,7 +29,7 @@ const Index = () => {
             <span className="text-neon-pink"> bid</span> on what you want,
             <span className="text-neon-green"> create</span> what you imagine.
           </p>
-          
+
           <div className="mt-6 flex flex-wrap gap-4 justify-center">
             <Link to="/create">
               <Button className="cyber-button text-sm" size="lg">
@@ -41,7 +48,7 @@ const Index = () => {
             </Link>
           </div>
         </div>
-        
+
         {/* Terminal-style text */}
         <div className="mb-10 max-w-3xl mx-auto overflow-hidden">
           <div className="bg-black border border-neon-green p-4 rounded font-mono text-sm">
@@ -56,12 +63,22 @@ const Index = () => {
             </p>
           </div>
         </div>
-        
+
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-6 text-center">
             <span className="text-neon-blue">Trending</span> Memes
           </h2>
-          <MemesGrid />
+          {isLoading ? (
+            <div className="text-center">
+              <p className="text-neon-green animate-pulse">Loading memes from the mainframe...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center text-red-500">
+              <p>Error loading memes: {error}</p>
+            </div>
+          ) : (
+            <MemesGrid />
+          )}
         </div>
       </section>
     </Layout>

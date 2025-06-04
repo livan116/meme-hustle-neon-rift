@@ -17,20 +17,20 @@ const MemeDetail: React.FC = () => {
   const [bidAmount, setBidAmount] = useState('');
   const [isSubmitting, setBidSubmitting] = useState(false);
   const [isGlitching, setIsGlitching] = useState(false);
-  
+
   const meme = getMemeById(id || '');
   const bids = id ? getTopBids(id) : [];
-  
+
   useEffect(() => {
     if (!meme) {
       navigate('/');
     }
   }, [meme, navigate]);
-  
+
   if (!meme) {
     return null;
   }
-  
+
   const handleUpvote = () => {
     if (!user) {
       toast({
@@ -40,11 +40,11 @@ const MemeDetail: React.FC = () => {
       });
       return;
     }
-    
+
     upvoteMeme(meme.id);
     setIsGlitching(true);
     setTimeout(() => setIsGlitching(false), 500);
-    
+
     toast({
       title: "UPVOTED",
       description: `${meme.title} boosted in the cyberspace`,
@@ -60,19 +60,19 @@ const MemeDetail: React.FC = () => {
       });
       return;
     }
-    
+
     downvoteMeme(meme.id);
-    
+
     toast({
       title: "DOWNVOTED",
       description: `${meme.title} degraded in the cyberspace`,
       variant: "destructive",
     });
   };
-  
+
   const handleBidSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
       toast({
         title: "ACCESS DENIED",
@@ -81,9 +81,9 @@ const MemeDetail: React.FC = () => {
       });
       return;
     }
-    
+
     const amount = parseInt(bidAmount);
-    
+
     if (isNaN(amount) || amount <= 0) {
       toast({
         title: "INVALID BID",
@@ -92,7 +92,7 @@ const MemeDetail: React.FC = () => {
       });
       return;
     }
-    
+
     if (amount <= meme.price) {
       toast({
         title: "BID TOO LOW",
@@ -101,7 +101,7 @@ const MemeDetail: React.FC = () => {
       });
       return;
     }
-    
+
     if (amount > (user?.credits || 0)) {
       toast({
         title: "INSUFFICIENT FUNDS",
@@ -110,9 +110,9 @@ const MemeDetail: React.FC = () => {
       });
       return;
     }
-    
+
     setBidSubmitting(true);
-    
+
     try {
       // Add bid to store
       addBid({
@@ -121,14 +121,14 @@ const MemeDetail: React.FC = () => {
         userName: user.name,
         amount
       });
-      
+
       // Subtract credits from user
       updateCredits(-amount);
-      
+
       // Transfer ownership if this is an instant buy (for the hackathon simplicity)
       if (amount >= meme.price * 2) {
         updateMemeOwner(meme.id, user.id, user.name, amount);
-        
+
         toast({
           title: "OWNERSHIP TRANSFERRED",
           description: `You now own "${meme.title}" for ${amount} credits!`,
@@ -140,7 +140,7 @@ const MemeDetail: React.FC = () => {
           description: `Bid of ${amount} credits placed on "${meme.title}"`,
         });
       }
-      
+
       setBidAmount('');
     } catch (error) {
       toast({
@@ -152,7 +152,7 @@ const MemeDetail: React.FC = () => {
       setBidSubmitting(false);
     }
   };
-  
+
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleString('en-US', {
       month: 'short',
@@ -168,20 +168,20 @@ const MemeDetail: React.FC = () => {
       <div className={`md:col-span-3 ${isGlitching ? 'animate-glitch' : ''}`}>
         <div className="cyber-card overflow-hidden">
           <div className="relative group">
-            <img 
-              src={meme.imageUrl} 
-              alt={meme.title} 
+            <img
+              src={meme.imageUrl}
+              alt={meme.title}
               className="w-full object-cover rounded"
             />
-            
+
             {/* Glitch overlay */}
             <div className="absolute inset-0 bg-glitch-pattern opacity-20"></div>
-            
+
             {/* Tags */}
             <div className="absolute bottom-4 left-4 z-10 flex flex-wrap gap-1">
               {meme.tags.map((tag, index) => (
-                <span 
-                  key={index} 
+                <span
+                  key={index}
                   className="text-xs bg-black/70 backdrop-blur-sm text-neon-blue px-2 py-0.5 rounded-sm"
                 >
                   #{tag}
@@ -189,16 +189,16 @@ const MemeDetail: React.FC = () => {
               ))}
             </div>
           </div>
-          
+
           <div className="mt-4">
             <h2 className="text-2xl font-bold text-neon-blue">{meme.title}</h2>
-            
+
             {meme.aiCaption && (
               <p className="text-sm italic text-foreground/80 mt-2">
                 "{meme.aiCaption}"
               </p>
             )}
-            
+
             {meme.vibeAnalysis && (
               <div className="mt-4 inline-block">
                 <span className="text-xs font-bold tracking-wider uppercase bg-cyber-primary/20 text-neon-pink px-3 py-1 rounded-sm">
@@ -207,7 +207,7 @@ const MemeDetail: React.FC = () => {
               </div>
             )}
           </div>
-          
+
           <div className="mt-6 flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
@@ -219,9 +219,9 @@ const MemeDetail: React.FC = () => {
                 <span className="text-sm">{formatDate(meme.createdAt)}</span>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2">
-              <button 
+              <button
                 onClick={handleUpvote}
                 className="text-foreground/70 hover:text-neon-green p-1 transition-colors"
                 aria-label="Upvote"
@@ -231,7 +231,7 @@ const MemeDetail: React.FC = () => {
               <span className="text-foreground/90 font-mono">
                 {meme.upvotes - meme.downvotes}
               </span>
-              <button 
+              <button
                 onClick={handleDownvote}
                 className="text-foreground/70 hover:text-neon-pink p-1 transition-colors"
                 aria-label="Downvote"
@@ -242,7 +242,7 @@ const MemeDetail: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Right column - Bidding and Info */}
       <div className="md:col-span-2">
         {/* Current price */}
@@ -255,7 +255,7 @@ const MemeDetail: React.FC = () => {
               <span className="text-sm ml-1 text-foreground/70">creds</span>
             </div>
           </div>
-          
+
           {/* Bidding form */}
           <form onSubmit={handleBidSubmit} className="mt-4">
             <div className="flex space-x-2">
@@ -268,8 +268,8 @@ const MemeDetail: React.FC = () => {
                 placeholder={`Min bid: ${meme.price + 1}`}
                 disabled={isSubmitting || !user}
               />
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="cyber-button whitespace-nowrap"
                 disabled={isSubmitting || !user}
               >
@@ -280,21 +280,21 @@ const MemeDetail: React.FC = () => {
                 )}
               </Button>
             </div>
-            
+
             <p className="text-xs text-foreground/50 mt-2">
               Bid higher than 2x the price for instant purchase
             </p>
           </form>
         </div>
-        
+
         {/* Current bids */}
         <div className="cyber-card">
           <h3 className="text-neon-blue text-lg mb-3">Recent Bids</h3>
-          
+
           {bids.length > 0 ? (
             <div className="space-y-3">
               {bids.map(bid => (
-                <div 
+                <div
                   key={bid.id}
                   className="flex items-center justify-between p-2 border border-cyber-primary/30 rounded bg-cyber-darker"
                 >
