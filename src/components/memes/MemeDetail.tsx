@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useMemeStore } from '@/stores/memeStore';
+import { useMemeStore, Bid } from '@/stores/memeStore';
 import { useUserStore } from '@/stores/userStore';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -11,21 +10,42 @@ import { ArrowUp, ArrowDown, Heart, Clock, Tag, DollarSign, User, X } from 'luci
 const MemeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getMemeById, upvoteMeme, downvoteMeme, addBid, getTopBids, updateMemeOwner } = useMemeStore();
-  const { user, updateCredits } = useUserStore();
+
+  const meme = useMemeStore(state => state.memes.find(m => m.id === id));
+  const upvoteMeme = useMemeStore(state => state.upvoteMeme);
+  const downvoteMeme = useMemeStore(state => state.downvoteMeme);
+  const addBid = useMemeStore(state => state.addBid);
+  const getTopBids = useMemeStore(state => state.getTopBids);
+  const updateMemeOwner = useMemeStore(state => state.updateMemeOwner);
+
+  const user = useUserStore(state => state.user);
+  const updateCredits = useUserStore(state => state.updateCredits);
+
   const { toast } = useToast();
   const [bidAmount, setBidAmount] = useState('');
   const [isSubmitting, setBidSubmitting] = useState(false);
   const [isGlitching, setIsGlitching] = useState(false);
-
-  const meme = getMemeById(id || '');
-  const bids = id ? getTopBids(id) : [];
+  const [topBids, setTopBids] = useState<Bid[]>([]);
+  const [bidsLoading, setBidsLoading] = useState(true);
 
   useEffect(() => {
-    if (!meme) {
+    if (!meme && !useMemeStore.getState().isLoading) {
       navigate('/');
     }
   }, [meme, navigate]);
+
+  useEffect(() => {
+    const fetchTopBids = async () => {
+      if (id) {
+        setBidsLoading(true);
+        const fetchedBids = await getTopBids(id);
+        setTopBids(fetchedBids);
+        setBidsLoading(false);
+      }
+    };
+
+    fetchTopBids();
+  }, [id, getTopBids, addBid]);
 
   if (!meme) {
     return null;
@@ -114,7 +134,6 @@ const MemeDetail: React.FC = () => {
     setBidSubmitting(true);
 
     try {
-      // Add bid to store
       addBid({
         memeId: meme.id,
         userId: user.id,
@@ -122,10 +141,8 @@ const MemeDetail: React.FC = () => {
         amount
       });
 
-      // Subtract credits from user
       updateCredits(-amount);
 
-      // Transfer ownership if this is an instant buy (for the hackathon simplicity)
       if (amount >= meme.price * 2) {
         updateMemeOwner(meme.id, user.id, user.name, amount);
 
@@ -164,7 +181,6 @@ const MemeDetail: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-      {/* Left column - Meme Image */}
       <div className={`md:col-span-3 ${isGlitching ? 'animate-glitch' : ''}`}>
         <div className="cyber-card overflow-hidden">
           <div className="relative group">
@@ -174,10 +190,8 @@ const MemeDetail: React.FC = () => {
               className="w-full object-cover rounded"
             />
 
-            {/* Glitch overlay */}
             <div className="absolute inset-0 bg-glitch-pattern opacity-20"></div>
 
-            {/* Tags */}
             <div className="absolute bottom-4 left-4 z-10 flex flex-wrap gap-1">
               {meme.tags.map((tag, index) => (
                 <span
@@ -243,9 +257,7 @@ const MemeDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* Right column - Bidding and Info */}
       <div className="md:col-span-2">
-        {/* Current price */}
         <div className="cyber-card mb-6">
           <div className="flex justify-between items-center">
             <h3 className="text-neon-purple text-lg">Current Price</h3>
@@ -256,7 +268,6 @@ const MemeDetail: React.FC = () => {
             </div>
           </div>
 
-          {/* Bidding form */}
           <form onSubmit={handleBidSubmit} className="mt-4">
             <div className="flex space-x-2">
               <Input
@@ -287,13 +298,16 @@ const MemeDetail: React.FC = () => {
           </form>
         </div>
 
-        {/* Current bids */}
         <div className="cyber-card">
           <h3 className="text-neon-blue text-lg mb-3">Recent Bids</h3>
 
-          {bids.length > 0 ? (
+          {bidsLoading ? (
+            <div className="text-center py-4 border border-cyber-primary/20 rounded">
+              <p className="text-foreground/50 text-sm">Loading bids...</p>
+            </div>
+          ) : topBids.length > 0 ? (
             <div className="space-y-3">
-              {bids.map(bid => (
+              {topBids.map(bid => (
                 <div
                   key={bid.id}
                   className="flex items-center justify-between p-2 border border-cyber-primary/30 rounded bg-cyber-darker"

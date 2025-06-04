@@ -19,7 +19,7 @@ export type Meme = {
   vibeAnalysis?: string;
 };
 
-type Bid = {
+export type Bid = {
   id: string;
   memeId: string;
   userId: string;
@@ -28,7 +28,7 @@ type Bid = {
   createdAt: Date;
 };
 
-type MemeStore = {
+export type MemeStore = {
   memes: Meme[];
   bids: Bid[];
   isLoading: boolean;
